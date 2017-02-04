@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>222</title>
+
+	<style type="text/css">
+	.main{
+		width: 100px;
+		height: 100px;
+		background-color: green;
+	}
+	</style>
+</head>
+<body ng-app="midai-oa">
+	<div id="container" ng-controller="newHtml">
+		<button ng-click="test()">点击试试看</button>
+		<div id="content"></div>
+	</div>
+
+
+	<script type="text/javascript" src="jquery-1.12.2.js"></script>
+	<script type="text/javascript" src="angular.js"></script>
+
+	<script type="text/javascript">
+	var controllerProvider = null;
+	var isPageReady = true;
+	var index = 0;
+		var app = angular.module('midai-oa', [], function($controllerProvider) {  
+              controllerProvider = $controllerProvider;  
+        });
+		app.controller('newHtml', function($scope, $compile) {
+		    $scope.test= function(){
+		    	
+		    	// $scope.add = function(){
+		    		$("#content").append('<div id="div2" data-page="page'+index+'">dynamicly add</div>');  
+	                registerController("div2", "page" + index, function($scope){  
+	                    console.log($("#div2").data('page'));
+	                });  
+		    	// }
+
+		    	// app.controller("page1Con", function($scope){
+		    	// 	$scope.name="huang"
+		    	// })
+		    };
+		});
+
+		function registerController(elementId, controllerName, func)  
+        {  
+            $("#"+elementId).attr("ng-controller",controllerName);  
+              
+            if(isPageReady == false)  
+            {  
+                myModule.controller(controllerName, func);  
+            }  
+            else  
+            {  
+                controllerProvider.register(controllerName, func);  
+                  
+                $("#"+elementId).injector().invoke(function($compile, $rootScope) {  
+                    $compile($("#"+elementId))($rootScope);  
+                });  
+            }  
+        }  
+		
+	</script>
+		
+
+</body>
+</html>

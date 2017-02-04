@@ -1,0 +1,15 @@
+<div>
+	这是home页面，一切的中心，哈哈~~~！
+	<button id="toDetailPage">点击进入嵌套页</button>
+</div>
+
+<script type="text/javascript">
+	$(function(){
+		$("#toDetailPage").click(function(){
+			a.openNewPage({
+				targetUrl: 'detail.html',
+				data: 'page=1'
+			})
+		})
+	})
+</script>

@@ -1,0 +1,40 @@
+.content-header .urlBlock{
+	width: 125px;
+	height: 40px;
+	line-height: 40px;
+	border-right:1px solid #d9d9d9;
+	padding:0 10px;
+	float: left;
+	cursor: pointer;
+	overflow: hidden;
+	background-color: #ccc;
+}
+.content-header .urlBlock.active{
+	box-shadow: 0 0 10px #ae0000 inset;
+}
+.content-header .urlBlock.active span.closePage{
+	background-color: #ee3300;
+	color: #ffffff;
+}
+.content-header .urlBlock span{
+	margin: 0;
+	padding: 0;
+}
+.content-header .urlTitle{
+	width:100px;
+	float:left;
+	text-align: center;
+}
+.content-header .urlBlock span.closePage {
+	color: red;
+	display: inline-block;
+	text-align: center;
+	width: 20px;
+	height: 20px;
+	margin-top: 10px;
+	line-height: 1;
+	border-radius: 10px;
+	cursor: pointer;
+	float: left;
+	background-color: #eee;
+}
