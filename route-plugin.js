@@ -39,7 +39,8 @@
 			"headerRemoveFncFlag" : args.headerRemoveFncFlag || false,
 			"headerApendCallback" : args.headerApendCallback || function(){ return false;},
 			"headerDelCallback" : args.headerDelCallback || function(){ return false},
-			"afterContainerChangeFnc" : args.afterContainerChangeFnc || function(){}
+			"afterContainerChangeFnc" : args.afterContainerChangeFnc || function(){},
+			"afterAppendContainer": function(){}
 		};
 		this.default = {
 			"currentUrl": "",
@@ -299,6 +300,8 @@
 			$(this.options.container).append("<div data-page=" + str + " class='containerPage'></div>");
 			$(this.options.container).find(".containerPage:last").load(str, function(){
 				// 这里后续添加一些方法
+				that.methods.afterAppendContainer();
+				that.methods.afterAppendContainer = function(){};
 			});
 		}
 
@@ -306,10 +309,20 @@
 
 		// 从携带的参数跳转页面的方式
 		function otherWayToOtherPage(that){
+
 					// 手动执行打开新页面的方法的时候执行的事件
 			function _openNewPage(obj){
 				var targetUrl = obj.targetUrl;
-				var data = obj.data;
+				var data = "";
+				if(typeof (obj.data) == "object"){
+					var myArr = [];
+					for(var attr in obj.data){
+						myArr.push(attr + "=" + obj.data[attr])
+					}
+					data = myArr.join('&')
+				}else{
+					 data = obj.data;
+				}
 				var urlStr = "";
 				that.default.changeFlag = 1;
 				that.initCurrentPageStyle();
@@ -329,11 +342,13 @@
 					if(afterUrl[i].split('?')[0] === currentUrl){
 						that.default.changeFlag = 0;
 						if(data === undefined){
+							// 如果要跳转的页面已经处于打开状态，并且没有携带参数，则直接让跳转的页面显示
 							that.default.currentUrl = targetUrl;
 							that.wholeLocalUrl();
 							return;
 						}
 						else{
+							// 如果要跳转的页面已经处于打开状态，并且携带了参数，则关闭当前页面，重新打开
 							that.closeCurrentPage({
 								delUrl:currentUrl
 							})
@@ -345,12 +360,13 @@
 				}
 				that.default.currentUrl = targetUrl;
 				if(that.default.changeFlag === 0){	
+					// 只是控制当前选项卡对应的页面的显示
 					window.location.href = that.default.orginUrl + "#" + that.default.currentUrl + urlStr;
 				}
 				if(that.default.changeFlag === 1){
 					if(data === undefined){
 						that.pushUrl(that.currentUrl);
-						that.initCurrentUrl();
+						that.initCurrentPageStyle();
 						that.addUrl();
 					}
 					else{
@@ -362,43 +378,33 @@
 			that.openNewPage = _openNewPage;
 
 			function _toOtherPage(obj){
-				function sleep(time){
-				    var cur = Date.now();
-				    while(cur + time >= Date.now()){}
-				}
-
 				delUrl = obj.delUrl; //当前要关闭的选项卡
 	            var toUrl = obj.toUrl; //要跳转的选项卡
-				swal({
-	                title: '<h5 style="font-size:20px;">提示</h5>',
-	                text: " 提交成功" ,
-	                showConfirmButton : false,
-	                timer:1000,
-	                html:true
-	            });
-	            
-				sleep(1000);
+	            this.default.currentUrl = toUrl;	            
 	            var index = 0;
-	            $(".container-header").find(".urlBlock").each(function(){
+	            $(this.options.header).find(".urlBlock").each(function(){
 	                var thisPage = $(this).data("page").split('?')[0];
 	                if(thisPage === delUrl){
 	                    $(this).find(".closePage").click();
 	                }
-	                else if(thisPage.match(toUrl)){
+	                else if(thisPage ===toUrl){
 	                    $(this).find(".urlTitle").click();
 	                    index ++;
 	                }
 	            })
+	            // 如果是当前选项卡未打开
 	            if(index === 0){
-	                $(toUrl.split(".")[0]).click();
+	                 this.openNewPage({
+	                 	targetUrl: toUrl
+	                 })
 	            }
 			}
 			that.toOtherPage = _toOtherPage;
 
 
 			function _closeCurrentPage(obj){
+				// 该方法只是为了关闭当前选项卡
 				var delUrl = obj.delUrl; //当前要关闭的选项卡
-	            var toUrl = obj.toUrl; //要跳转的选项卡
 				var index = 0;
 				if(obj.callback && typeof obj.callback == "function"){
 	            	that.methods.afterContainerChangeFnc = obj.callback;
@@ -476,9 +482,10 @@
 			var that = this;
 			// var str = this.default.afterUrl.split("!/" + that.default.deleteUrl);
 			var str = "";
-			for(var i = 0; i < that.default.urlArr.length; i++){
-				if(!that.default.urlArr[i].match(that.default.deleteUrl)){
-					str += "!/" + that.default.urlArr[i];
+			var currentHrefUrl = window.location.href.split('!/');
+			for(var i = 1; i < currentHrefUrl.length; i++){
+				if(!(currentHrefUrl[i].split('?')[0] === that.default.deleteUrl)){
+					str += "!/" + currentHrefUrl[i];
 				}
 			} 
 			this.delUrlInArray();
@@ -578,6 +585,7 @@
 				switch(that.default.changeFlag){
 					case 0: 
 						that.onlyChangCurrentUrl();
+						that.checkCurrentPageIsExit();
 						break;
 					case 1:
 						that.addHashUrl();
